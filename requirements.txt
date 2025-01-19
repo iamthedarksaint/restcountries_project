@@ -1,0 +1,10 @@
+pandas
+fastapi
+pyarrow
+requests
+sqlalchemy
+python-decouple
+psycopg2-binary
+postgres
+uvicorn
+pydantic
