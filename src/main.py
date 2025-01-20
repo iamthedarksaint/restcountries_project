@@ -14,32 +14,44 @@ def load():
     url = "https://restcountries.com/v3.1/all?fields=name,independent,unMember,startOfWeek,currencies,idd,capital,region,subregion,languages,area,population,continents"
 
     response = requests.get(url)
+    print(f"Converting data to Json...")
     data = response.json()
-    print(f"Converting data to DataFrame...")
-    df = pd.json_normalize(data)
-    return df
+    return data
 
-def transform(df=pd.DataFrame) -> pd.DataFrame:
-    print('transforming data......')
-    language = [col for col in df.columns if col.startswith('languages.')]
+def transform(data=dict) -> pd.DataFrame:
+    all_columns = []
+    for column in data:
+        all_columns.append([column.get('name').get('common'),
+                        column.get('independent'),
+                        column.get('unMember'),
+                        column.get('startOfWeek'),
+                        column.get('name').get('official'),
+                        [val.get('common') for val in column.get('name', {}).get('nativeName', {}).values()],
+                        column.get('currencies').keys(),
+                        [val.get('name') for val in column.get('currencies', {}).values()],
+                        [val.get('symbol') for val in column.get('currencies', {}).values()],
+                        column.get('idd').get('root'),
+                        column.get('idd').get('suffixes'),
+                        column.get('capital'),
+                        column.get('region'),
+                        column.get('subregion'),
+                        column.get('languages').values(),
+                        column.get('area'),
+                        column.get('population'),
+                        column.get('continents')
+                        ]
+                       )
 
-    currencies = [col for col in df.columns if col.startswith('currencies.')]
-
-    df['languages'] = df[language].apply(lambda x: ", ".join(x.dropna()), axis=1)
-
-    df['currencies'] = df[currencies].apply(lambda x: ", ".join(x.dropna()), axis=1)
-
-    df = df[['name.common', 'independent', 'unMember', 'startOfWeek', 'name.official', 'name.nativeName.eng.common', 'idd.root', 'idd.suffixes', 'capital', 'region', 'subregion', 'languages', 'area', 'population', 'continents', 'currencies', 'currency_code']]
-
-    df = df.rename(columns={'name.common': 'country_name','unMember':'un_member','startOfWeek': 'start_of_week', 'name.official':'official_country_name', 'name.nativeName.eng.common': 'common_native_name', 'idd.root': 'idd_root', 'idd.suffixes': 'idd_suffixes', 'subregion':'sub_region'})
-    print("Data has been cleaned!")
+    df = pd.DataFrame(all_columns)
+    df.columns = ['country_name', 'independent','un_member', 'start_of_week','official_country_name','common_native_name','currency_code', 'currency_name', 'currency_symbol', 'idd_root', 'idd_suffixes', 'capital', 'region', 'sub_region', 'languages', 'area', 'population', 'continents']
+    df['currency_code'] = df['currency_code'].apply(list)
+    df['languages'] = df['languages'].apply(list)
+    print(df.head())
     return df
 
 def store(df=pd.DataFrame):
     print('storing data......')
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S') 
-    df.to_parquet(f"datalake/restcountries_{timestamp}.parquet")
-    print(f"Data saved as parquet file.")
     df.to_csv(f"datalake/restcountries_{timestamp}.csv")
     print(f"Data saved as csv file.")
 
@@ -63,8 +75,9 @@ def update(df:pd.DataFrame):
             area = row['area'],
             population = row['population'],
             continents = row['continents'],
-            currencies = row['currencies'],
-            currency_code = row['currency_code']
+            currency_code = row['currency_code'],
+            currency_name = row['currency_name'],
+            currency_symbol = row['currency_symbol']
     )
     for row in df.to_dict(orient='records')
     ]

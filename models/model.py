@@ -23,5 +23,7 @@ class TravelAgency(Base):
     area = Column(Float) 
     population = Column(Integer)
     continents = Column(Text)
-    currencies = Column(Text)
     currency_code = Column(Text)
+    currency_name = Column(Text)
+    currency_symbol = Column(Text)
+
