@@ -12,6 +12,6 @@ def get_db() -> scoped_session:
     """ Connect to Postgres"""
     engine = create_engine(db_url, pool_size=1, max_overflow=1)
     session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    TennisSession = scoped_session(session)
-    return TennisSession
+    RestCountrySession = scoped_session(session)
+    return RestCountrySession
 

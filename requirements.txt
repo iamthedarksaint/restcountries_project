@@ -8,3 +8,4 @@ psycopg2-binary
 postgres
 uvicorn
 pydantic
+ipykernel

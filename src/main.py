@@ -46,7 +46,6 @@ def transform(data=dict) -> pd.DataFrame:
     df.columns = ['country_name', 'independent','un_member', 'start_of_week','official_country_name','common_native_name','currency_code', 'currency_name', 'currency_symbol', 'idd_root', 'idd_suffixes', 'capital', 'region', 'sub_region', 'languages', 'area', 'population', 'continents']
     df['currency_code'] = df['currency_code'].apply(list)
     df['languages'] = df['languages'].apply(list)
-    print(df.head())
     return df
 
 def store(df=pd.DataFrame):
@@ -89,7 +88,7 @@ def update(df:pd.DataFrame):
 def main():
     data = load()
     clean_data = transform(data)
-    store(clean_data)
+    # store(clean_data)
     update(clean_data)
 
 
